@@ -6,3 +6,4 @@ lazy val root = (project in file(".")).settings(name := "botbek")
 
 libraryDependencies += "io.github.apimorphism" %% "telegramium-core" % "7.56.0"
 libraryDependencies += "io.github.apimorphism" %% "telegramium-high" % "7.56.0"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig" % "0.17.1"
