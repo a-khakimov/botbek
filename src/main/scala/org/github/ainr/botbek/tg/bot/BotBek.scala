@@ -3,7 +3,7 @@ package org.github.ainr.botbek.tg.bot
 import cats.Parallel
 import cats.effect.Async
 import cats.syntax.all._
-import org.github.ainr.botbek.tg.conf.Config
+import org.github.ainr.botbek.tg.conf.TelegramConfig
 import org.http4s.client.Client
 import telegramium.bots.high.implicits.methodOps
 import telegramium.bots.high.{Api, BotApi, LongPollBot, Methods}
@@ -30,7 +30,7 @@ object BotBek {
   def make[
       F[_]: Async: Parallel
   ](
-      conf: Config,
+      conf: TelegramConfig,
       httpClient: Client[F]
   ): BotBek[F] = {
     val api: Api[F] = BotApi(

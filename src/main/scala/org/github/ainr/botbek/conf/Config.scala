@@ -1,18 +1,21 @@
-package org.github.ainr.botbek.tg.conf
+package org.github.ainr.botbek.conf
 
 import cats.effect.Sync
 import cats.syntax.all._
+import org.github.ainr.botbek.tg.conf.TelegramConfig
+import pureconfig.{ConfigConvert, ConfigSource}
 import pureconfig.error.ConfigReaderException
 import pureconfig.generic.semiauto.deriveConvert
-import pureconfig.{ConfigConvert, ConfigSource}
 
 final case class Config(
-    token: String
+    telegram: TelegramConfig
 )
 
 object Config {
 
-  implicit private val convert: ConfigConvert[Config] = deriveConvert
+  implicit private val convertTelegramConfig: ConfigConvert[TelegramConfig] =
+    deriveConvert
+  implicit private val convertConfig: ConfigConvert[Config] = deriveConvert
 
   def make[F[_]: Sync](): F[Config] =
     Sync[F].delay {
