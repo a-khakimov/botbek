@@ -13,14 +13,15 @@ object Main extends IOApp {
     .use { httpClient =>
       for {
         config <- Config.make[IO]()
-        unsplash = UnsplashModule(config.unsplash, httpClient)
-        bot <- BotBek.make[IO](
+        unsplash = UnsplashModule[IO](config.unsplash, httpClient)
+        bot = BotBek.make[IO](
           config.telegram,
           httpClient
         )(
           unsplash.unsplashService
-        ).start()
-      } yield bot
+        )
+        _ <- bot.start()
+      } yield ()
     }
 
   override def run(args: List[String]): IO[ExitCode] =
