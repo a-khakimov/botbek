@@ -39,9 +39,9 @@ object UnsplashRepository {
 
     new UnsplashRepository[F] {
       override def getUserStatistics(user: String): F[RawStatistics] = for {
-        uri <- EitherT.fromEither[F](
-          Uri.fromString(s"${conf.url}/users/$user/statistics")
-        ).rethrowT
+        uri <- EitherT
+          .fromEither[F](Uri.fromString(s"${conf.url}/users/$user/statistics"))
+          .rethrowT
         statistics <-
           httpClient.expect(request.withUri(uri))(jsonOf[F, RawStatistics])
       } yield statistics

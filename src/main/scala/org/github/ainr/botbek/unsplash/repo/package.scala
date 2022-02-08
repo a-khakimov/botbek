@@ -5,25 +5,36 @@ package object repo {
   final case class RawStatistics(
       id: String,
       username: String,
-      downloads: Downloads
+      downloads: RawDownloads,
+      views: RawViews
   )
 
-  final case class Downloads(
+  final case class RawDownloads(
       total: Long,
-      historical: HistoricalDownloads
+      historical: RawHistoricalDownloads
   )
 
-  final case class HistoricalDownloads(
-      values: List[DownloadValue]
+  final case class RawHistoricalDownloads(
+      values: List[RawDownloadValue]
   )
 
-  final case class DownloadValue(
+  final case class RawDownloadValue(
       date: String,
       value: Long
   )
 
-  final case class Views(
-      total: Long
+  final case class RawViews(
+      total: Long,
+      historical: RawHistoricalViews
+  )
+
+  final case class RawHistoricalViews(
+      values: List[RawViewValue]
+  )
+
+  final case class RawViewValue(
+      date: String,
+      value: Long
   )
 
   final case class Errors(error: List[String])
