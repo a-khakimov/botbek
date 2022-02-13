@@ -7,6 +7,8 @@ import org.github.ainr.botbek.infrastructure.Timer
 import org.github.ainr.botbek.infrastructure.syntax.schedulerSyntax
 import org.github.ainr.botbek.tg.bot.BotBek
 import org.github.ainr.botbek.unsplash.service.{Statistics, UnsplashService}
+import org.typelevel.log4cats.Logger
+import org.typelevel.log4cats.syntax.LoggerInterpolator
 
 import java.time.LocalTime
 import scala.concurrent.duration.DurationInt
@@ -18,7 +20,7 @@ trait ScheduledTasks[F[_]] {
 
 object ScheduledTasks {
 
-  def apply[F[_]: Applicative: Monad: Sync: Timer](
+  def apply[F[_]: Applicative: Monad: Sync: Timer: Logger](
       unsplashService: UnsplashService[F],
       tgBot: BotBek[F]
   ): ScheduledTasks[F] = {
@@ -32,7 +34,7 @@ object ScheduledTasks {
               checkTaskTime(task).flatMap {
                 case isMomentHasCome if isMomentHasCome =>
                   for {
-                    _ <- Sync[F].delay(println(s"Run for ${task.time}"))
+                    _ <- info"Run for ${task.time}"
                     _ <- tgBot.sendMessage(
                       chatId = task.chatId,
                       text = "Пидр: ${task.time}"
@@ -51,7 +53,7 @@ object ScheduledTasks {
               }
           }
       }.as(()).recover {
-        case error => Sync[F].delay(println(s"Recovering error - $error"))
+        case error => error"Recovering error - $error"
       }.every {
         1 minute
       }
@@ -70,8 +72,7 @@ object ScheduledTasks {
 
       private def checkTaskTime(task: Task): F[Boolean] = for {
         now <- Sync[F].delay(LocalTime.now())
-        _ <-
-          Sync[F].delay(println(s"Check time: task - ${task.time}, now - $now"))
+        _ <- info"Check time: task - ${task.time}, now - $now"
         result =
           task.time.isAfter(now) && task.time.isBefore(now.plusMinutes(1))
       } yield result
