@@ -37,17 +37,18 @@ object ScheduledTasks {
                     _ <- info"Run for ${task.time}"
                     _ <- tgBot.sendMessage(
                       chatId = task.chatId,
-                      text = "Пидр: ${task.time}"
+                      text =
+                        s"Привет! Наступило время ${task.time} для загрузки статистики с unsplash."
                     )
-                    // stats <- unsplashService.getUserStatistics(task.user)
-                    // _ <- Sync[F].delay(println(s"Stats ${stats}"))
-                    // _ <- tgBot.sendMessage(
-                    //  chatId = task.chatId,
-                    //  text = s"""|У ${stats.username} сегодня
-                    //         |скачиваний: ${getDownloadsFromStatistics(stats)}
-                    //         |просмотров: ${getViewsFromStatistics(stats)}
-                    //         |""".stripMargin
-                    // )
+                    stats <- unsplashService.getUserStatistics(task.user)
+                    _ <- info"Stats $stats"
+                    _ <- tgBot.sendMessage(
+                      chatId = task.chatId,
+                      text = s"""|У ${stats.username} сегодня
+                             |скачиваний: ${getDownloadsFromStatistics(stats)}
+                             |просмотров: ${getViewsFromStatistics(stats)}
+                             |""".stripMargin
+                    )
                   } yield ()
                 case _ => ().pure[F]
               }
