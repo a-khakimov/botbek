@@ -14,7 +14,9 @@ package object schedule {
       time: LocalTime
   )
 
+  // yep. this is hard code, bro
   def tasks[F[_]: Applicative]: F[List[Task]] = List(
+    Task("ainr", ChatIntId(174861972), LocalTime.of(0, 0)),
     Task("ainr", ChatIntId(174861972), LocalTime.of(9, 0)),
     Task("ainr", ChatIntId(174861972), LocalTime.of(22, 0))
   ).pure[F]
