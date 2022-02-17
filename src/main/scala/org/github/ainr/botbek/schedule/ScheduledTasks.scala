@@ -10,7 +10,7 @@ import org.github.ainr.botbek.unsplash.service.{Statistics, UnsplashService}
 import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.syntax.LoggerInterpolator
 
-import java.time.LocalTime
+import java.time.{LocalTime, ZoneId}
 import scala.concurrent.duration.DurationInt
 import scala.language.postfixOps
 
@@ -72,7 +72,7 @@ object ScheduledTasks {
       }
 
       private def checkTaskTime(task: Task): F[Boolean] = for {
-        now <- Sync[F].delay(LocalTime.now())
+        now <- Sync[F].delay(LocalTime.now(ZoneId.of("Asia/Yekaterinburg")))
         _ <- info"Check time: task - ${task.time}, now - $now"
         result =
           task.time.isAfter(now) && task.time.isBefore(now.plusMinutes(1))

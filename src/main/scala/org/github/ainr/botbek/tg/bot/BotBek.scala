@@ -1,7 +1,7 @@
 package org.github.ainr.botbek.tg.bot
 
 import cats.Parallel
-import cats.effect.Async
+import cats.effect.{Async, Sync}
 import cats.syntax.all._
 import org.github.ainr.botbek.infrastructure.Timer
 import org.github.ainr.botbek.tg.conf.TelegramConfig
@@ -11,6 +11,8 @@ import telegramium.bots.high.implicits.methodOps
 import telegramium.bots.high.{Api, BotApi, LongPollBot, Methods}
 import telegramium.bots.{ChatId, ChatIntId, Message}
 
+import java.time.{LocalDateTime, LocalTime, ZoneId}
+import java.util.TimeZone
 import scala.language.postfixOps
 
 trait BotBek[F[_]] {
@@ -32,7 +34,7 @@ object BotBek {
       override def onMessage(msg: Message): F[Unit] = {
         Methods.sendMessage(
           chatId = ChatIntId(msg.chat.id),
-          text = s"Привет, брат."
+          text = s"Привет, брат. Да, я работаю."
         ).exec(api).as(())
       }
 
