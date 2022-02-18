@@ -10,7 +10,15 @@ import org.github.ainr.botbek.unsplash.service.{Statistics, UnsplashService}
 import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.syntax.LoggerInterpolator
 import org.nspl.awtrenderer._
-import org.nspl.{RelFontSize, StrokeConf, line, xyplot}
+import org.nspl.{
+  Color,
+  RelFontSize,
+  StrokeConf,
+  TableLayout,
+  line,
+  sequence,
+  xyplot
+}
 import telegramium.bots.{ChatIntId, InputPartFile}
 
 import java.time.{LocalTime, ZoneId}
@@ -43,14 +51,13 @@ object ScheduledTasks {
                     _ <- tgBot.sendMessage(
                       chatId = task.chatId,
                       text = s"""
-                      |s"Настало время для загрузки статистики с unsplash, брат."
+                      |Настало время для загрузки статистики с unsplash, брат.
                       |У тебя, ${stats.username}, за последние сутки было
                       |скачиваний: ${getLastDownloadsFromStatistics(stats)}
                       |просмотров: ${getLastViewsFromStatistics(stats)}
                       |""".stripMargin
                     )
-                    _ <- sendAllViewStats(task.chatId, stats)
-                    _ <- sendAllDownloadsStats(task.chatId, stats)
+                    _ <- sendAllStats(task.chatId, stats)
                   } yield ()
                 case _ => ().pure[F]
               }
@@ -75,33 +82,32 @@ object ScheduledTasks {
       }
 
       // refach it
-      private def sendAllViewStats(
+      private def sendAllStats(
           chatId: ChatIntId,
           statistics: Statistics
       ): F[Unit] = for {
         views <-
           statistics.views.historical.values.map(_.value.toDouble).pure[F]
-        plot <- Sync[F].delay(xyplot(views -> line(stroke =
-          StrokeConf(RelFontSize(1))
-        ))(
-          main = "Views"
-        ).build)
-        file <- Sync[F].delay(renderToFile(plot, width = 2000))
-        _ <- tgBot.sendPhoto(chatId, InputPartFile(file))
-      } yield ()
-
-      private def sendAllDownloadsStats(
-          chatId: ChatIntId,
-          statistics: Statistics
-      ): F[Unit] = for {
-        views <-
+        downloads <-
           statistics.downloads.historical.values.map(_.value.toDouble).pure[F]
-        plot <- Sync[F].delay(xyplot(views -> line(stroke =
-          StrokeConf(RelFontSize(1))
-        ))(
-          main = "Views"
-        ).build)
-        file <- Sync[F].delay(renderToFile(plot, width = 2000))
+        viewsPlot <- Sync[F].delay {
+          xyplot(views -> line(
+            stroke = StrokeConf(RelFontSize(0.5)),
+            color = Color.blue
+          ))(
+            main = "Views"
+          ).build
+        }
+        downloadsPlot <- Sync[F].delay {
+          xyplot(downloads -> line(
+            stroke = StrokeConf(RelFontSize(0.5)),
+            color = Color.red
+          ))(
+            main = "Downloads"
+          ).build
+        }
+        sequencedPlot = sequence(List(viewsPlot, downloadsPlot), TableLayout(2))
+        file <- Sync[F].delay(renderToFile(sequencedPlot, width = 2000))
         _ <- tgBot.sendPhoto(chatId, InputPartFile(file))
       } yield ()
 
