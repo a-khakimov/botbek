@@ -15,7 +15,7 @@ package object schedule {
   )
 
   // yep. this is hard code, bro
-  def tasks[F[_]: Applicative]: F[List[Task]] = List(
+  def tasksF[F[_]: Applicative]: F[List[Task]] = List(
     Task("ainr", ChatIntId(174861972), LocalTime.of(18, 0))
   ).pure[F]
 }
