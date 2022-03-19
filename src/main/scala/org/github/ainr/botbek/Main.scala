@@ -1,5 +1,6 @@
 package org.github.ainr.botbek
 
+import cats.syntax.all.*
 import cats.effect.kernel.GenTemporal
 import cats.effect.{ExitCode, IO, IOApp}
 import org.github.ainr.botbek.conf.Config
@@ -15,7 +16,7 @@ import scala.concurrent.duration.FiniteDuration
 
 object Main extends IOApp {
 
-  implicit val timer: Timer[IO] =
+  given timer: Timer[IO] =
     (duration: FiniteDuration) => GenTemporal[IO].sleep(duration)
 
   val app: IO[Unit] = BlazeClientBuilder[IO]
@@ -23,14 +24,14 @@ object Main extends IOApp {
     .use { httpClient =>
       for {
         logger <- Slf4jLogger.create[IO]
-        config <- Config.make[IO]()
+        config <- Config.load[IO]
         unsplash = UnsplashModule[IO](config.unsplash, httpClient)
         bot = BotBek.make[IO](config.telegram, httpClient)
         scheduledTasks = {
-          implicit val logger0: SelfAwareStructuredLogger[IO] = logger
+          given logger0: SelfAwareStructuredLogger[IO] = logger
           ScheduledTasks[IO](unsplash.unsplashService, bot)
         }
-        botFiber <- bot.start.start
+        botFiber <- bot.start().start
         scheduledTasksFiber <- scheduledTasks.run.start
         _ <- botFiber.join
         _ <- scheduledTasksFiber.join

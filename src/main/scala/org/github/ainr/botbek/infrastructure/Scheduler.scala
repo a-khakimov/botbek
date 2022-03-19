@@ -1,7 +1,7 @@
 package org.github.ainr.botbek.infrastructure
 
 import cats.MonadThrow
-import cats.syntax.all._
+import cats.syntax.all.*
 
 import scala.concurrent.duration.FiniteDuration
 import scala.language.implicitConversions

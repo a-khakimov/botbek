@@ -1,36 +1,36 @@
 package org.github.ainr.botbek.conf
 
-import cats.effect.Sync
-import cats.syntax.all._
+import cats.effect.Async
+import cats.syntax.all.*
 import org.github.ainr.botbek.tg.conf.TelegramConfig
 import org.github.ainr.botbek.unsplash.conf.UnsplashConfig
-import pureconfig.{ConfigConvert, ConfigSource}
-import pureconfig.error.ConfigReaderException
-import pureconfig.generic.semiauto.deriveConvert
+import ciris.*
+import lt.dvim.ciris.Hocon._
+import com.typesafe.config.ConfigFactory
 
 final case class Config(
     telegram: TelegramConfig,
     unsplash: UnsplashConfig
 )
 
-object Config {
+object Config:
+  def load[F[_]: Async]: F[Config] = {
 
-  implicit private val convertUnsplashConfig: ConfigConvert[UnsplashConfig] =
-    deriveConvert
-  implicit private val convertTelegramConfig: ConfigConvert[TelegramConfig] =
-    deriveConvert
-  implicit private val convertConfig: ConfigConvert[Config] = deriveConvert
+    val config = ConfigFactory.load("reference.conf")
+    val telegram = hoconAt(config)("telegram")
+    val unsplash = hoconAt(config)("unsplash")
 
-  def make[F[_]: Sync](): F[Config] =
-    Sync[F].delay {
-      ConfigSource
-        .default
-        .load[Config]
-    }
-      .flatMap {
-        case Left(error) =>
-          Sync[F]
-            .raiseError(new ConfigReaderException[Config](error))
-        case Right(config) => config.pure[F]
-      }
-}
+    val telegramConfig: ConfigValue[Effect, TelegramConfig] = (
+      telegram("url").as[String],
+      telegram("token").as[String]
+    ).parMapN(TelegramConfig.apply)
+
+    val unsplashConfig: ConfigValue[Effect, UnsplashConfig] = (
+      unsplash("url").as[String],
+      unsplash("token").as[String]
+    ).parMapN(UnsplashConfig.apply)
+
+    (telegramConfig, unsplashConfig)
+      .parMapN(Config.apply)
+      .load
+  }
