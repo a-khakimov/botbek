@@ -26,7 +26,7 @@ jobs:
       - name: Deploy to remote
         uses: garygrossgarten/github-action-scp@release
         with:
-          local: target/scala-2.13/botbek.jar
+          local: target/scala-3.1.1/botbek.jar
           remote: /home/botbek/builds/botbek.jar
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
