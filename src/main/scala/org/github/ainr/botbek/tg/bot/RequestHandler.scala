@@ -1,6 +1,6 @@
 package org.github.ainr.botbek.tg.bot
 
-import cats.FlatMap
+import cats.effect.Sync
 import cats.syntax.all.*
 import org.github.ainr.botbek.BuildInfo
 import org.github.ainr.botbek.infrastructure.context.Context
@@ -15,32 +15,36 @@ trait RequestHandler[F[_]]:
   def handle(message: Message): Context[F[Method[Message]]]
 
 object RequestHandler:
-  def apply[F[_]: FlatMap](
+  def apply[F[_]: Sync](
       logger: ContextLogger[F]
   ): RequestHandler[F] = new RequestHandler[F] {
 
-    private def sendVersion(id: ChatId): Method[Message] =
-      Methods.sendMessage(
-        chatId = id,
-        text =
-          s"""${BuildInfo.name} ${BuildInfo.version}
-           |Commit: ${BuildInfo.gitHeadCommit.getOrElse("")}
-           |Build time: ${
-              new SimpleDateFormat("dd.MM.yyyy HH:mm:ss")
-                .format(BuildInfo.buildTime)
-            }
-           |""".stripMargin
-      )
+    private def sendVersion(id: ChatId): Context[F[Method[Message]]] =
+      Sync[F].delay {
+        Methods.sendMessage(
+          chatId = id,
+          text =
+            s"""${BuildInfo.name} ${BuildInfo.version}
+               |Commit: ${BuildInfo.gitHeadCommit.getOrElse("")}
+               |Build time: ${
+                new SimpleDateFormat("dd.MM.yyyy HH:mm:ss")
+                  .format(BuildInfo.buildTime)
+              }
+               |""".stripMargin
+        )
+      } <* logger.info(s"Send BuildInfo $BuildInfo")
 
-    private def defaultResponse(id: ChatId): Method[Message] =
-      Methods.sendMessage(
-        chatId = id,
-        text = s"Привет, брат. Да, я работаю."
-      )
+    private def defaultResponse(id: ChatId): Context[F[Method[Message]]] =
+      Sync[F].delay {
+        Methods.sendMessage(
+          chatId = id,
+          text = s"Привет, брат. Да, я работаю."
+        )
+      } <* logger.info(s"Default response")
 
     private def commands(
         message: Message
-    ): Method[Message] = message.text match {
+    ): Context[F[Method[Message]]] = message.text match {
       case Some("/version") => sendVersion(ChatIntId(message.chat.id))
       case other            => defaultResponse(ChatIntId(message.chat.id))
     }
@@ -48,6 +52,6 @@ object RequestHandler:
     override def handle(message: Message): Context[F[Method[Message]]] =
       for
         _ <- logger.info(s"Message from ${message.chat.id} ${message.text}")
-        method = commands(message)
-      yield method
+        response <- commands(message)
+      yield response
   }
