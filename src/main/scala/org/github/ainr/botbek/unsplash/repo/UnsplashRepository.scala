@@ -13,21 +13,20 @@ import org.http4s.headers.{Accept, Authorization}
 
 import scala.language.implicitConversions
 
-trait UnsplashRepository[F[_]] {
+trait UnsplashRepository[F[_]]:
   def getUserStatistics(user: String): F[RawStatistics]
-}
 
-object UnsplashRepository {
+object UnsplashRepository:
 
   def apply[F[_]: Applicative: Concurrent](
       conf: UnsplashConfig,
       httpClient: Client[F]
   )(
-      implicit
+      using
       F: MonadError[F, Throwable]
   ): UnsplashRepository[F] = {
 
-    lazy val auth = Authorization(
+    lazy val authHeader = Authorization(
       Credentials.Token(
         AuthScheme.Bearer,
         conf.token
@@ -35,9 +34,9 @@ object UnsplashRepository {
     )
 
     val mediaTypeJson = Accept(MediaType.application.json)
-    val request = Request[F]().putHeaders(auth, mediaTypeJson)
+    val request = Request[F]().putHeaders(authHeader, mediaTypeJson)
 
-    new UnsplashRepository[F] {
+    new UnsplashRepository[F]:
       override def getUserStatistics(user: String): F[RawStatistics] = for {
         uri <- EitherT
           .fromEither[F](Uri.fromString(s"${conf.url}/users/$user/statistics"))
@@ -45,6 +44,4 @@ object UnsplashRepository {
         statistics <-
           httpClient.expect(request.withUri(uri))(jsonOf[F, RawStatistics])
       } yield statistics
-    }
   }
-}

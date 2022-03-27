@@ -4,11 +4,10 @@ import cats.Functor
 import cats.syntax.all._
 import org.github.ainr.botbek.unsplash.repo.UnsplashRepository
 
-trait UnsplashService[F[_]] {
+trait UnsplashService[F[_]]:
   def getUserStatistics(user: String): F[Statistics]
-}
 
-object UnsplashService {
+object UnsplashService:
 
   def apply[F[_]: Functor](
       repo: UnsplashRepository[F]
@@ -19,4 +18,3 @@ object UnsplashService {
         .map(Statistics.apply)
     }
   }
-}

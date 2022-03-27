@@ -12,21 +12,3 @@ object Timer {
       timer: Timer[F]
   ): Timer[F] = timer
 }
-
-/*
-object Test extends IOApp {
-
-  import syntax.schedulerSyntax
-
-  implicit val timer: Timer[IO] =
-    (duration: FiniteDuration) => GenTemporal[IO].sleep(duration)
-
-  def foo[F[_]: Applicative: Timer: MonadThrow](): F[Unit] =
-    42.pure[F].map(println)
-
-  override def run(args: List[String]): IO[ExitCode] = {
-
-    foo[IO]().every(5.seconds).as(ExitCode.Success)
-  }
-}
- */

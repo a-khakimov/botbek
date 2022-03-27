@@ -7,11 +7,10 @@ import org.github.ainr.botbek.unsplash.repo.UnsplashRepository
 import org.github.ainr.botbek.unsplash.service.UnsplashService
 import org.http4s.client.Client
 
-trait UnsplashModule[F[_]] {
+trait UnsplashModule[F[_]]:
   def unsplashService: UnsplashService[F]
-}
 
-object UnsplashModule {
+object UnsplashModule:
 
   def apply[F[_]: Applicative: Concurrent](
       conf: UnsplashConfig,
@@ -26,4 +25,3 @@ object UnsplashModule {
     override def unsplashService: UnsplashService[F] =
       UnsplashService(unsplashRepository)
   }
-}
