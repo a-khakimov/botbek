@@ -23,14 +23,14 @@ object Config:
     val telegramConfig: ConfigValue[Effect, TelegramConfig] = (
       telegram("url").as[String],
       telegram("token").as[String]
-    ).parMapN(TelegramConfig.apply)
+    ).mapN(TelegramConfig.apply)
 
     val unsplashConfig: ConfigValue[Effect, UnsplashConfig] = (
       unsplash("url").as[String],
       unsplash("token").as[String]
-    ).parMapN(UnsplashConfig.apply)
+    ).mapN(UnsplashConfig.apply)
 
     (telegramConfig, unsplashConfig)
-      .parMapN(Config.apply)
+      .mapN(Config.apply)
       .load
   }

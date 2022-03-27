@@ -1,11 +1,29 @@
-ThisBuild / version := "0.1.0-SNAPSHOT"
-ThisBuild / organization := "org.github.ainr"
+import sbtbuildinfo.BuildInfoKeys
+
 ThisBuild / scalaVersion := "3.1.1"
 
 lazy val root = (project in file("."))
+  .enablePlugins(BuildInfoPlugin)
+  .enablePlugins(GitVersioning)
   .settings(
     name := "botbek",
-    assembly / assemblyJarName := "botbek.jar"
+    organization := "org.github.ainr",
+    version := "0.1.0-SNAPSHOT",
+    assembly / assemblyJarName := "botbek.jar",
+    buildInfoKeys ++= Seq[BuildInfoKey](
+      name,
+      version,
+      scalaVersion,
+      sbtVersion,
+      resolvers,
+      BuildInfoKey.action("buildTime") {
+        System.currentTimeMillis
+      },
+      BuildInfoKey.action("gitHeadCommit") {
+        git.gitHeadCommit.value map { sha => s"v$sha" }
+      }
+    ),
+    buildInfoPackage := "org.github.ainr.botbek"
   )
 
 libraryDependencies ++= Seq(
