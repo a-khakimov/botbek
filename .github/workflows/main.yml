@@ -31,3 +31,12 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           password: ${{ secrets.SSH_PASSWORD }}
+
+      - name: Deploy notification
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.INFORM_CHAT_ID }}
+          token: ${{ secrets.TG_TOKEN }}
+          message: |
+            New release is deployed 🚀
+            Commit SHA = ${{ github.sha }}
