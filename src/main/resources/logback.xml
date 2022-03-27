@@ -1,14 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-        <!-- encoders are assigned the type
-             ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>common.log</file>
+        <append>true</append>
         <encoder>
             <pattern>%d{dd.MM.yyyy HH:mm:ss.SSS} [%thread] %-5level %logger{20} - %msg%n</pattern>
         </encoder>
     </appender>
-
-    <root level="debug">
-        <appender-ref ref="STDOUT" />
+    <appender name="BOTBEKAPP" class="ch.qos.logback.core.FileAppender">
+        <file>botbek.app.log</file>
+        <append>true</append>
+        <encoder>
+            <pattern>%d{dd.MM.yyyy HH:mm:ss.SSS} [%thread] %-5level %logger{20} - %msg%n</pattern>
+        </encoder>
+    </appender>
+    <logger name="org.github.ainr.botbek.BotbekApp" level="DEBUG" additivity="false">
+        <appender-ref ref="BOTBEKAPP"/>
+    </logger>
+    <root>
+        <appender-ref ref="FILE"/>
     </root>
 </configuration>
