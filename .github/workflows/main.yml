@@ -30,6 +30,15 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           password: ${{ secrets.SSH_PASSWORD }}
 
+      - name: Restart
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          script: |
+            sudo /usr/bin/systemctl restart botbek.service
+          
       - name: Deploy notification
         uses: appleboy/telegram-action@master
         with:
