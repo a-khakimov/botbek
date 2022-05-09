@@ -27,17 +27,12 @@ object BotbekApp extends IOApp {
       for {
         slf4jLogger <-
           Slf4jLogger.fromName[IO]("org.github.ainr.botbek.BotbekApp")
+        _ <- slf4jLogger.info("Logger created")
         contextLogger = ContextLogger[IO](slf4jLogger)
         config <- Config.load[IO]
-        unsplash = UnsplashModule[IO](
-          config.unsplash,
-          httpClient
-        )
-        telegram = TelegramModule[IO](
-          config.telegram,
-          httpClient,
-          contextLogger
-        )
+        _ <- slf4jLogger.info("Configs ok")
+        unsplash = UnsplashModule[IO](config.unsplash, httpClient)
+        telegram = TelegramModule[IO](config.telegram, httpClient, contextLogger)
         scheduledTasks = {
           given logger0: SelfAwareStructuredLogger[IO] = slf4jLogger
           ScheduledTasks[IO](
@@ -46,8 +41,10 @@ object BotbekApp extends IOApp {
           )
         }
         botFiber <- telegram.botBek.start().start
+        scheduledTaskFiber <- scheduledTasks.run.start
+        _ <- slf4jLogger.info("App started")
         _ <- botFiber.join
-        _ <- scheduledTasks.run
+        _ <- scheduledTaskFiber.join
       } yield ()
     }
 
