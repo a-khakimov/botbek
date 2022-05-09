@@ -36,7 +36,7 @@ object ScheduledTasks:
             _ <- tasks.traverse {
               task =>
                 checkTaskTime(task).flatMap {
-                  case moment: Boolean if moment => runTask(task)
+                  case moment: Boolean if moment => recovered(runTask(task))
                   case _                         => ().pure[F]
                 }
             }
@@ -63,7 +63,7 @@ object ScheduledTasks:
 
     private def repeated(f: F[Unit]): F[Unit] = f.every(1 minute)
 
-    private def recovered(f: F[Unit]): F[Unit] = f.recover {
+    private def recovered(f: F[Unit]): F[Unit] = f.recoverWith {
       case cause => error"Recovered from error: $cause"
     }
 
@@ -120,7 +120,6 @@ object ScheduledTasks:
       for
         now <- Sync[F].delay(LocalTime.now(ZoneId.of("Asia/Yekaterinburg")))
         _ <- info"Check time: task - ${task.time}, now - $now"
-        result =
-          task.time.isAfter(now) && task.time.isBefore(now.plusMinutes(1))
+        result = task.time.isAfter(now) && task.time.isBefore(now.plusMinutes(1))
       yield result
   }
