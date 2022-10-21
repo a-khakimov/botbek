@@ -1,6 +1,6 @@
 import sbtbuildinfo.BuildInfoKeys
 
-ThisBuild / scalaVersion := "3.1.1"
+ThisBuild / scalaVersion := "3.2.0"
 
 lazy val root = (project in file("."))
   .enablePlugins(BuildInfoPlugin)
@@ -27,9 +27,10 @@ lazy val root = (project in file("."))
   )
 
 libraryDependencies ++= Seq(
-  "io.github.apimorphism" %% "telegramium-core" % "7.57.0",
-  "io.github.apimorphism" %% "telegramium-high" % "7.57.0",
-  "is.cir" %% "ciris" % "2.3.2",
+  "ch.epfl.scala" % "sbt-bloop_2.12_1.0" % "1.5.4",
+  "io.github.apimorphism" %% "telegramium-core" % "7.62.0",
+  "io.github.apimorphism" %% "telegramium-high" % "7.62.0",
+  "is.cir" %% "ciris" % "2.4.0",
   "lt.dvim.ciris-hocon" %% "ciris-hocon" % "1.0.1",
   "io.circe" %% "circe-core" % "0.14.1",
   "io.circe" %% "circe-parser" % "0.14.1",
